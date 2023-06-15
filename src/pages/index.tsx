@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import Head from "next/head";
 import { useRouter } from "next/router";
+import useLocalStorage from "./hooks/useLocalStorage";
 
 const calculateTimeDifference = (server, client) => {
   const timeDifference = Math.abs(client.getTime() - server.getTime());
@@ -51,6 +52,17 @@ function Home() {
   const moveToTaskManager = () => {
     router.push("/tasks");
   };
+  
+  
+
+  
+
+  function handleNameChange(event: ChangeEvent<HTMLInputElement>): void {
+    throw new Error('Function not implemented.');
+  }
+  const handleNameChange = (event) => {
+    setName(event.target.value);
+  };
 
   return (
     <>
@@ -83,6 +95,10 @@ function Home() {
           <button onClick={moveToTaskManager}>Task</button>
         </div>
       </main>
+      <div>
+      <input type="text" value={name} onChange={handleNameChange} />
+      <p>Hello, {name}!</p>
+    </div>
     </>
   );
 }
