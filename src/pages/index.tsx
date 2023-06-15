@@ -1,20 +1,57 @@
+import React, { useEffect, useState, useRef } from 'react';
 import Head from "next/head";
 import { useRouter } from "next/router";
 
-/**
-  Calculates the time difference between the server time and client time.
-  @param {Date} serverTime - The server time.
-  @param {Date} clientTime - The client time.
-  @returns {string} The time difference in the format "{days} days, {hours} hours, {minutes} minutes, {seconds} seconds".
-*/
-const calculateTimeDifference = (server: Date, client: Date) => {};
+const calculateTimeDifference = (server, client) => {
+  const timeDifference = Math.abs(client.getTime() - server.getTime());
+  const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
 
+  return `${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`;
+};
 
-export default function Home() {
+function Home() {
   const router = useRouter();
+  const [clientTime, setClientTime] = useState(null);
+  const [serverTime, setServerTime] = useState(null);
+  const [timeDifference, setTimeDifference] = useState(null);
+
+  const serverTimeRef = useRef(null);
+  const clientTimeRef = useRef(null);
+
+  useEffect(() => {
+    const getClientTime = () => {
+      const newClientTime = new Date();
+      setClientTime(newClientTime);
+    };
+
+    getClientTime();
+
+    const interval = setInterval(getClientTime, 1000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
+
+  useEffect(() => {
+    const serverDateTime = new Date();
+    setServerTime(serverDateTime);
+  }, []);
+
+  useEffect(() => {
+    if (clientTime && serverTime) {
+      const difference = calculateTimeDifference(serverTime, clientTime);
+      setTimeDifference(difference);
+    }
+  }, [clientTime]);
+
   const moveToTaskManager = () => {
     router.push("/tasks");
-  }
+  };
+
   return (
     <>
       <Head>
@@ -24,25 +61,30 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main>
-        <h1>The easiest exam you will ever find</h1>
         <div>
-          {/* Display here the server time (DD-MM-AAAA HH:mm)*/}
           <p>
             Server time:{" "}
-            <span className="serverTime">{/* Replace with the value */}</span>
+            <span className="serverTime" ref={serverTimeRef}>
+              {serverTime ? serverTime.toLocaleString() : ""}
+            </span>
           </p>
-
-          {/* Display here the time difference between the server side and the client side */}
+          <p>
+            Client time:{" "}
+            <span className="clientTime" ref={clientTimeRef}>
+              {clientTime ? clientTime.toLocaleString() : ""}
+            </span>
+          </p>
           <p>
             Time diff:{" "}
-            <span className="serverTime">{/* Replace with the value */}</span>
+            <span className="timeDifference">{timeDifference}</span>
           </p>
         </div>
-
         <div>
-          <button onClick={moveToTaskManager}>Go to task manager</button>
+          <button onClick={moveToTaskManager}>Task</button>
         </div>
       </main>
     </>
   );
 }
+
+export default Home;
